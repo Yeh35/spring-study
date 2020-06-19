@@ -24,21 +24,28 @@ ext {
 }
 
 dependencies {
+	//Spring
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-hateoas'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 
-	compileOnly 'org.projectlombok:lombok'
-	annotationProcessor 'org.projectlombok:lombok'
-
-	implementation 'mysql:mysql-connector-java'
-
-	testRuntimeOnly 'com.h2database:h2'
-
+	//Spring Test
 	testImplementation('org.springframework.boot:spring-boot-starter-test') {
 		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
 	}
 	testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
+
+	//DB
+	implementation 'mysql:mysql-connector-java'
+	testRuntimeOnly 'com.h2database:h2'
+
+	//Lombok
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+
+	//Other
+	implementation 'org.modelmapper:modelmapper:2.3.1'
+
 }
 
 test {

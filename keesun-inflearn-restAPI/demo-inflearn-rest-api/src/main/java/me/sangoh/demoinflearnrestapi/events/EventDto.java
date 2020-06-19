@@ -1,19 +1,18 @@
 package me.sangoh.demoinflearnrestapi.events;
 
-import lombok.*;
 
-import javax.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.time.LocalDateTime;
 
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
-@EqualsAndHashCode(of = "id")
-@Getter @Setter
-@Entity
-public class Event {
+@NoArgsConstructor @AllArgsConstructor
+@Data
+public class EventDto {
 
-    @Id @GeneratedValue
     private Integer id;
     private String name;
     private String description;
@@ -25,10 +24,5 @@ public class Event {
     private int basePrice; // (optional)
     private int maxPrice; // (optional)
     private int limitOfEnrollment;
-    private boolean offline;
-    private boolean free;
-
-    @Enumerated(EnumType.STRING) //중요
-    private EventStatus eventStatus = EventStatus.DRAFT;
 
 }
