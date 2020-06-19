@@ -28,6 +28,7 @@ public class Event {
     private boolean offline;
     private boolean free;
 
+    @Builder.Default
     @Enumerated(EnumType.STRING) //중요
     private EventStatus eventStatus = EventStatus.DRAFT;
 
