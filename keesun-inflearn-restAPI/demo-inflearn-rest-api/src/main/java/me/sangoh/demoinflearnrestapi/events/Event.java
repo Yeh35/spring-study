@@ -8,8 +8,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(of = "id")
-
-@Getter @Setter햐
+@Getter @Setter
 public class Event {
 
     private Integer id;
