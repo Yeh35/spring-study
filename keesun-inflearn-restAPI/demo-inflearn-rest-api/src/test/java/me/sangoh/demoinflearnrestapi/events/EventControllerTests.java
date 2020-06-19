@@ -2,7 +2,9 @@ package me.sangoh.demoinflearnrestapi.events;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import me.sangoh.demoinflearnrestapi.common.TestDescription;
 import org.hamcrest.Matchers;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
@@ -39,6 +41,7 @@ public class EventControllerTests {
     ObjectMapper objectMapper;
 
     @Test
+    @DisplayName("정상적으로 이벤트를 생성하는 테스트")
     public void createEvent() throws Exception {
         EventDto event = EventDto.builder()
                 .name("Spring")
@@ -69,7 +72,8 @@ public class EventControllerTests {
     }
 
     @Test
-    public void createEvent_Bad_c() throws Exception {
+    @DisplayName("입력 받을 수 없는 값을 사용한 경우에 에러가 발생하는 테스트")
+    public void createEvent_Bad_Request_Many_Input() throws Exception {
         Event event = Event.builder()
                 .name("Spring")
                 .description("REST API Development with Spring")
@@ -95,6 +99,7 @@ public class EventControllerTests {
     }
 
     @Test
+    @DisplayName("입력값이 비어있는 경우 에러가 발생하는 테스트")
     public void createEvent_Bad_Request_Empty_Input() throws Exception {
         EventDto eventDto = EventDto.builder().build();
 
@@ -106,6 +111,7 @@ public class EventControllerTests {
     }
 
     @Test
+    @DisplayName("입력값이 이상한 경우 에러가 발생하는 테스트")
     public void createEvent_Bad_Request_Wrong_Input() throws Exception {
         EventDto event = EventDto.builder()
                 .name("Spring")

@@ -1,6 +1,7 @@
 package me.sangoh.demoinflearnrestapi.events;
 
 
+import me.sangoh.demoinflearnrestapi.common.TestDescription;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
