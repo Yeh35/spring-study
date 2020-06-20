@@ -3,6 +3,10 @@ package me.sangoh.demoinflearnrestapi.events;
 
 import me.sangoh.demoinflearnrestapi.common.TestDescription;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+
+import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -35,7 +39,7 @@ public class EventTest {
     }
 
     @Test
-    void testFree() {
+    void testFreeIsTrue() {
         // given
         Event event = Event.builder()
                 .basePrice(0)
@@ -47,49 +51,39 @@ public class EventTest {
 
         //then
         assertTrue(event.isFree());
+    }
 
-
+    @Test
+    void testFreeIsFalse() {
         // given
-        event = Event.builder()
+        Event[] Events = new Event[3];
+
+        Events[0] = Event.builder()
                 .basePrice(100)
                 .maxPrice(0)
                 .build();
 
-        // when
-        event.update();
-
-        //then
-        assertFalse(event.isFree());
-
-
-        // given
-        event = Event.builder()
+        Events[1] = Event.builder()
                 .basePrice(0)
                 .maxPrice(100)
                 .build();
 
-        // when
-        event.update();
-
-        //then
-        assertFalse(event.isFree());
-
-
-        // given
-        event = Event.builder()
+        Events[2] = Event.builder()
                 .basePrice(100)
                 .maxPrice(200)
                 .build();
 
         // when
-        event.update();
+        for (Event event: Events) {
+            event.update();
 
-        //then
-        assertFalse(event.isFree());
+            //then
+            assertFalse(event.isFree());
+        }
     }
     
     @Test
-    public void testOffline() {
+    public void testOfflineIsTrue() {
         // given
         Event event = Event.builder()
                 .location("강남역 네이버 D2 스타텁 팩토리")
@@ -100,30 +94,28 @@ public class EventTest {
 
         //then
         assertTrue(event.isOffline());
-
-
-        // given
-        event = Event.builder()
-                .build();
-
-        // when
-        event.update();
-
-        //then
-        assertFalse(event.isOffline());
-
-
-        // given
-        event = Event.builder()
-                .location("")
-                .build();
-
-        // when
-        event.update();
-
-        //then
-        assertFalse(event.isOffline());
     }
 
 
+    @Test
+    public void testOfflineIsFalse() {
+
+        // given
+        Event[] Events = new Event[2];
+
+        Events[0] = Event.builder()
+                .build();
+
+        Events[1] = Event.builder()
+                .location("")
+                .build();
+
+        for (Event event: Events) {
+            // when
+            event.update();
+
+            //then
+            assertFalse(event.isOffline());
+        }
+    }
 }
