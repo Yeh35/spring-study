@@ -14,6 +14,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -33,6 +34,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @AutoConfigureRestDocs
 @Import(RestDocsConfiguration.class)
+@ActiveProfiles("test")
 public class EventControllerTests {
 
     // Mocking 되어있는 디스페쳐 서블릿 상대로 가짜 요청 만들어서 서블릿에 보내고 응답을 받는다.
@@ -73,16 +75,16 @@ public class EventControllerTests {
                 .andExpect(jsonPath("free").value(Matchers.is(false)))
                 .andExpect(jsonPath("offline").value(Matchers.is(true)))
                 .andExpect(jsonPath("eventStatus").value(Matchers.is(EventStatus.DRAFT.toString())))
-                .andExpect(jsonPath("_links.self").exists())
-                .andExpect(jsonPath("_links.query-events").exists())
-                .andExpect(jsonPath("_links.update-event").exists())
+//                .andExpect(jsonPath("_links.self").exists())
+//                .andExpect(jsonPath("_links.query-events").exists())
+//                .andExpect(jsonPath("_links.update-event").exists())
 //                .andExpect(jsonPath("_link.profiles").exists())
                 .andDo(document("create-event",
                         links(
                                 linkWithRel("self").description("link to self"),
                                 linkWithRel("query-events").description("link to query events"),
-                                linkWithRel("update-event").description("link to update an existing event")
-//                                linkWithRel("profiles").description("link to profiles an existing event")
+                                linkWithRel("update-event").description("link to update an existing event"),
+                                linkWithRel("profiles").description("link to profiles an existing event")
                         ),
                         requestHeaders(
                                 headerWithName(HttpHeaders.ACCEPT).description("accept header"),
@@ -120,6 +122,7 @@ public class EventControllerTests {
                                 fieldWithPath("offline").description("this event is offline"),
                                 fieldWithPath("eventStatus").description("event status"),
 
+                                fieldWithPath("_links.profile.href").description("link to profile"),
                                 fieldWithPath("_links.self.href").description("link to self"),
                                 fieldWithPath("_links.query-events.href").description("link to query events"),
                                 fieldWithPath("_links.update-event.href").description("link to update an existing event")
@@ -151,6 +154,7 @@ public class EventControllerTests {
                 .content(objectMapper.writeValueAsString(event))) //원하는 응답 형태
                 .andDo(print())
                 .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("_links.index").exists())
         ;
     }
 
@@ -163,7 +167,9 @@ public class EventControllerTests {
                     .contentType(MediaType.APPLICATION_JSON_VALUE)
                     .accept(MediaTypes.HAL_JSON_VALUE)
                     .content(objectMapper.writeValueAsString(eventDto)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("_links.index").exists())
+        ;
     }
 
     @Test
@@ -188,11 +194,14 @@ public class EventControllerTests {
                 .content(objectMapper.writeValueAsString(event)))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$[0].objectName").exists())
+                .andExpect(jsonPath("errors[0].objectName").exists())
 //                .andExpect(jsonPath("$[0].field").exists())
-                .andExpect(jsonPath("$[0].defaultMessage").exists())
-                .andExpect(jsonPath("$[0].code").exists())
+                .andExpect(jsonPath("errors[0].defaultMessage").exists())
+                .andExpect(jsonPath("errors[0].code").exists())
 //                .andExpect(jsonPath("$[0].rejectedValue").exists())
+                .andExpect(jsonPath("_links.index").exists())
+
+
         ;
     }
 
