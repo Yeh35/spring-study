@@ -2,12 +2,17 @@ package me.sangoh.demoinflearnrestapi.events;
 
 import me.sangoh.demoinflearnrestapi.common.ErrorsResource;
 import org.modelmapper.ModelMapper;
-import org.springframework.hateoas.Link;
-import org.springframework.hateoas.MediaTypes;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceEditor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.*;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.Errors;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -52,8 +57,17 @@ public class EventController {
         eventResource.add(linkTo(EventController.class).withRel("query-events"));
 //        eventResource.add(selfLinkBuilder.withSelfRel()); //eventResource에 만듬
         eventResource.add(selfLinkBuilder.withRel("update-event"));
-        eventResource.add(Link.of("/docs/index.html#resources-events-create"));
+        eventResource.add(new Link("/docs/index.html#resources-events-create").withRel("profiles"));
         return ResponseEntity.created(createdUri).body(eventResource);
+    }
+
+    @GetMapping
+    public ResponseEntity queryEvents(Pageable pageable, PagedResourcesAssembler<Event> assembler) {
+        Page<Event> page = this.eventRepository.findAll(pageable);
+//        PagedModel<EventResource> pageResource = assembler.toModel(page, entity -> new EventResource(entity));
+        var pagedResources = assembler.toModel(page, e -> new EventResource(e));
+        pagedResources.add(new Link("/docs/index.html#query-events-list").withRel("profile"));
+        return ResponseEntity.ok().body(pagedResources);
     }
 
     private ResponseEntity badRequest(Errors errors) {
