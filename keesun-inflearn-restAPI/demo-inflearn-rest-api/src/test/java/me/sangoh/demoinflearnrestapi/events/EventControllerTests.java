@@ -1,11 +1,13 @@
 package me.sangoh.demoinflearnrestapi.events;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import me.sangoh.demoinflearnrestapi.common.RestDocsConfiguration;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -26,8 +28,7 @@ import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.li
 import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.links;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -47,6 +48,9 @@ public class EventControllerTests {
 
     @Autowired
     ObjectMapper objectMapper;
+
+    @Autowired
+    ModelMapper modelMapper;
 
     @Autowired
     EventRepository eventRepository;
@@ -258,11 +262,123 @@ public class EventControllerTests {
         ;
     }
 
+    @Test
+    @DisplayName("이벤트 업데이트 (내가 만든것)")
+    public void updateEvent_Writed_Me() throws Exception {
+        // Given
+        Event event = generateEvent(10);
+
+        EventDto eventDto = EventDto.builder()
+                .name("Spring")
+                .description("REST API Development with Spring")
+                .beginEnrollmentDateTime(LocalDateTime.of(2020, 6, 19, 10, 0))
+                .closeEnrollmentDateTime(LocalDateTime.of(2020, 6, 21, 10, 0))
+                .beginEventDateTime(LocalDateTime.of(2020, 6, 21, 11, 0))
+                .endEventDateTime(LocalDateTime.of(2020, 6, 25, 12, 0))
+                .basePrice(100)
+                .maxPrice(200)
+                .limitOfEnrollment(100)
+                .location("강남역 D2 스타텁 팩토리")
+                .build();
+
+
+        // When + Then
+        mockMvc.perform(put("/api/events/{id}", event.getId())
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(objectMapper.writeValueAsString(eventDto)))
+            .andDo(print())
+            .andDo(document("update-event"))
+        ;
+    }
+
+    @Test
+    @DisplayName("이벤트 업데이트")
+    public void updateEvent() throws Exception {
+        // Given
+        Event event = generateEvent(200);
+        EventDto eventDto = this.modelMapper.map(event,EventDto.class);
+        String eventName = "Updated Event";
+        eventDto.setName(eventName);
+
+        //When
+        this.mockMvc.perform(put("/api/events/{id}", event.getId())
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(objectMapper.writeValueAsString(eventDto)))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("name").value(eventName))
+                .andExpect(jsonPath("_links.self").exists())
+        ;
+
+    }
+
+    @Test
+    @DisplayName("이벤트 업데이트 (입력이 비어있는 경우)")
+    public void updateEvent_400_Empty() throws Exception {
+        // Given
+        Event event = generateEvent(200);
+        EventDto eventDto = new EventDto();
+
+        //When
+        this.mockMvc.perform(put("/api/events/{id}", event.getId())
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(objectMapper.writeValueAsString(eventDto)))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+        ;
+
+    }
+
+    @Test
+    @DisplayName("이벤트 업데이트 (입력값이 잘못된 경우)")
+    public void updateEvent_400_Wrong() throws Exception {
+        // Given
+        Event event = generateEvent(200);
+        EventDto eventDto = this.modelMapper.map(event, EventDto.class);
+        eventDto.setBasePrice(20200);
+        eventDto.setMaxPrice(100);
+
+        //When
+        this.mockMvc.perform(put("/api/events/{id}", event.getId())
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(objectMapper.writeValueAsString(eventDto)))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+        ;
+
+    }
+
+    @Test
+    @DisplayName("이벤트 업데이트 (존재하지 않는 이벤트)")
+    public void updateEvent_404() throws Exception {
+        // Given
+        Event event = generateEvent(200);
+        EventDto eventDto = this.modelMapper.map(event, EventDto.class);
+
+        //When
+        this.mockMvc.perform(put("/api/events/{id}", 999999)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(objectMapper.writeValueAsString(eventDto)))
+                .andDo(print())
+                .andExpect(status().isNotFound())
+        ;
+    }
+
     private Event generateEvent(int i) {
         Event event = Event.builder()
                 .name("event " + i)
-                .description("test Event " + i)
+                .description("Test Event")
+                .beginEnrollmentDateTime(LocalDateTime.of(2020, 6, 19, 10, 0))
+                .closeEnrollmentDateTime(LocalDateTime.of(2020, 6, 21, 10, 0))
+                .beginEventDateTime(LocalDateTime.of(2020, 6, 21, 11, 0))
+                .endEventDateTime(LocalDateTime.of(2020, 6, 25, 12, 0))
+                .basePrice(100)
+                .maxPrice(200)
+                .limitOfEnrollment(100)
+                .location("강남역 D2 스타텁 팩토리")
                 .build();
+
+        event.update();
 
         return this.eventRepository.save(event);
     }

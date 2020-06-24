@@ -9,11 +9,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.*;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
+import javax.persistence.EntityNotFoundException;
 import javax.validation.Valid;
 import java.net.URI;
 import java.util.Optional;
@@ -79,6 +81,36 @@ public class EventController {
         EventResource eventResource = new EventResource(event);
         eventResource.add(new Link("/docs/index.html#resources-events-get").withRel("profile"));
         return ResponseEntity.ok().body(eventResource);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity updateEvent(@PathVariable Integer id, @RequestBody @Valid EventDto eventDto, Errors errors) {
+
+        if (errors.hasErrors()) {
+            return badRequest(errors);
+        }
+
+        eventValidator.validate(eventDto, errors);
+        if (errors.hasErrors()) {
+            return badRequest(errors);
+        }
+
+        try {
+            Event event = this.eventRepository.getOne(id);
+
+            event = eventDto.to(event);
+            event.update();
+
+            //그냥 Event를 쓰면 왜 에러가 나지...
+            Event updatedEvent = eventRepository.save(event);
+
+            EventResource eventResource = new EventResource(updatedEvent);
+            eventResource.add(linkTo(EventController.class).withRel("query-events"));
+            eventResource.add(new Link("/docs/index.html#resources-events-update").withRel("profile"));
+            return ResponseEntity.ok().body(eventResource);
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     private ResponseEntity badRequest(Errors errors) {

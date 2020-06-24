@@ -36,4 +36,22 @@ public class EventDto {
     @Min(0)
     private int limitOfEnrollment;
 
+    /**
+     * Dto의 값을 Event Entity로 옮겨준다.
+     * @param event 값이 변경될 이벤트
+     */
+    public Event to(Event event) {
+        event.setName(name);
+        event.setDescription(description);
+        event.setBeginEnrollmentDateTime(beginEnrollmentDateTime);
+        event.setCloseEnrollmentDateTime(closeEnrollmentDateTime);
+        event.setBeginEventDateTime(beginEventDateTime);
+        event.setEndEventDateTime(endEventDateTime);
+        event.setLocation(location);
+        event.setBasePrice(basePrice);
+        event.setMaxPrice(maxPrice);
+        event.setLimitOfEnrollment(limitOfEnrollment);
+
+        return event;
+    }
 }
