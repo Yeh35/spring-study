@@ -1,6 +1,7 @@
 package me.sangoh.demoinflearnrestapi.events;
 
 import lombok.*;
+import me.sangoh.demoinflearnrestapi.accounts.Account;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -31,6 +32,9 @@ public class Event {
     @Builder.Default
     @Enumerated(EnumType.STRING) //중요
     private EventStatus eventStatus = EventStatus.DRAFT;
+
+    @ManyToOne
+    private Account manager;
 
     public void update() {
 
