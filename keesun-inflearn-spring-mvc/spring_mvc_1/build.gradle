@@ -1,0 +1,23 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '2.2.6.RELEASE' //apply false
+    id 'io.spring.dependency-management' version '1.0.9.RELEASE'
+    id "com.ewerk.gradle.plugins.querydsl" version "1.0.10"
+}
+
+group 'me.sangoh.spring_mvc_1'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+    jcenter()
+}
+
+
+dependencies {
+    compile('org.springframework.boot:spring-boot-starter-web')
+    testCompile('org.springframework.boot:spring-boot-starter-test')
+
+    compile('org.projectlombok:lombok')
+    annotationProcessor('org.projectlombok:lombok')
+}
