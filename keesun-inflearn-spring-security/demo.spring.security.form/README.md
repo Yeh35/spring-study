@@ -36,3 +36,28 @@ implementation 'org.springframework.boot:spring-boot-starter-security'
       http.httpBasic();
     }
     ```
+  
+## 인메모리 유저 추가
+* 이 방법은 좋은 방법은 아니다. (실습을 위한..)
+*  properties를 이용한 설정 방법
+기본 유저를 등록해주는 `UserDetailsServiceAutoConfiguration`로 가면 
+기본 유저에 정보를 `SecurityProperties`를 통해서 가져온다는 걸 알 수 있다.
+우리가 Properties를 통해서 인메모리 유저의 Name과 password를 정의해줄 수 있다.
+    ```
+    spring.security.user.name=admin
+    spring.security.user.password=1234
+    spring.security.user.roles=ADMIN
+    ```
+   
+*  `SecurityConfig`를 이용한 설정 방법
+    위에서 만든 `SecurityConfig` Class에 가서 다음과 같이 설정하면 된다.
+    ```java
+   @Override
+   protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+       auth.inMemoryAuthentication()
+               .withUser("sangoh").password("{noop}123").roles("USER")
+           .and()
+               .withUser("admin").password("{noop}!@#").roles("ADMIN");
+   }
+    ```
+
