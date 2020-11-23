@@ -106,3 +106,34 @@ implementation 'org.springframework.boot:spring-boot-starter-security'
 
 3. 회원가입하는 URL 혹은 페이지를 만들어서 Account를 등록하면 로그인 할 수 있다.
     
+## PasswordEncoder
+비밀번호를 저장할때 사용되는 password이다.
+다음과 같이 등록하면 되는데 `NoOpPasswordEncoder`은 아무것도 안해주는 인코더이다. 
+(실에서는 사용하지 말것, Security 5 이전에 쓰던 방법)
+```java
+@Bean
+public PasswordEncoder passwordEncoder() {
+    return NoOpPasswordEncoder.getInstance();
+}
+```
+
+### Security5부터 Password 기본적략이 바뀐 이유
+`NoOp`에서 `{인코딩}비밀번호`방식으로 바뀌었다.
+바뀐 이유는 기존에 비밀번호는 평문으로 저장되어 있을 수도 있고 다른 인증 알고리즘을 사용하고 싶어할 수도 있기에
+앞에 인코딩 방식을 정의해주는 방식으로 갔다.
+spring에서 추천하는 방식은 다음과 같다.
+```java
+@Bean
+	public PasswordEncoder passwordEncoder() {
+		return PasswordEncoderFactories.createDelegatingPasswordEncoder();
+	}
+```
+
+encoding은 다음과 같이 하면 된다.
+```java
+public void encodingPassword(PasswordEncoder passwordEncoder) {
+    password = passwordEncoder.encode(password);
+}
+```
+
+

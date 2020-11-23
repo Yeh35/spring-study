@@ -1,5 +1,7 @@
 package me.sangoh.demo.spring.security.form.acount;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -21,7 +23,7 @@ public class Account {
     private Account() {}
     public Account(String username, String password, String role) {
         this.username = username;
-        this.password = "{noop}" + password;
+        this.password = password;
         this.role = role;
     }
 
@@ -39,5 +41,9 @@ public class Account {
 
     public String getRole() {
         return role;
+    }
+
+    public void encodingPassword(PasswordEncoder passwordEncoder) {
+        password = passwordEncoder.encode(password);
     }
 }
