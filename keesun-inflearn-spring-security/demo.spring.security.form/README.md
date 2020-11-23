@@ -137,3 +137,92 @@ public void encodingPassword(PasswordEncoder passwordEncoder) {
 ```
 
 
+## security Test
+```groovy
+testImplementation 'org.springframework.security:spring-security-test'
+```
+security test에 사용할 의존성을 받는다.
+
+다음은 테스트 코드인데
+```java
+@Test
+public void index_user() throws Exception {
+    mockMvc.perform(get("/").with(user("sangoh").roles("USER")))
+            .andDo(print())
+            .andExpect(status().isOk())
+    ;
+}
+```
+`.with(user("sangoh").roles("USER")`라는 부분은 아까받은 의존성으로 추가한 것이다.
+`sangoh`라는 USER로 로그인한 상태로 테스트를 진행한다는 것이다. (한마디로 **Mocking**을 하는 것이다.)
+아님 어노테이션으로도 가능하다.
+
+```java
+@Test
+@WithMockUser(username = "sangoh", roles = "USER")
+public void index_user_anotation() throws Exception {
+    mockMvc.perform(get("/"))
+            .andDo(print())
+            .andExpect(status().isOk())
+    ;
+}
+```
+
+어노테이션으로 만들어서 사용해도 된다.
+```java
+@WithMockUser(username = "sangoh", roles = "USER")
+@Target({ ElementType.METHOD, ElementType.TYPE })
+@Retention(RetentionPolicy.RUNTIME)
+public @interface WithUser {}
+```
+
+```java
+@Test
+@WithUser
+public void index_user_anotation() throws Exception {
+    mockMvc.perform(get("/"))
+            .andDo(print())
+            .andExpect(status().isOk())
+    ;
+}
+```
+
+### 폼인증(formLogin) 테스트 하는 방법
+```java
+@Test
+@Transactional
+public void login() throws Exception {
+
+    String username = "sangoh";
+    String password = "123";
+
+    accountService.createNew(new Account(
+            username,
+            password,
+            "USER"
+    ));
+
+    mockMvc.perform(formLogin().user(username).password(password))
+            .andExpect(authenticated())
+        ;
+}
+
+@Test
+@Transactional
+public void login_fail() throws Exception {
+
+    String username = "sangoh";
+    String password = "123";
+
+    accountService.createNew(new Account(
+            username,
+            password,
+            "USER"
+    ));
+
+    mockMvc.perform(formLogin().user(username).password("dd"))
+            .andExpect(unauthenticated())
+    ;
+}
+```
+`formLogin`, `authenticated`, `unauthenticated`는 security-test가 지원하는 기능이다.
