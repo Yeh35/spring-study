@@ -52,12 +52,57 @@ implementation 'org.springframework.boot:spring-boot-starter-security'
 *  `SecurityConfig`를 이용한 설정 방법
     위에서 만든 `SecurityConfig` Class에 가서 다음과 같이 설정하면 된다.
     ```java
-   @Override
-   protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+    @Override
+    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
        auth.inMemoryAuthentication()
                .withUser("sangoh").password("{noop}123").roles("USER")
            .and()
                .withUser("admin").password("{noop}!@#").roles("ADMIN");
-   }
+    }
     ```
 
+## JPA 연동
+1. 일단 의존성부터 추가 한다.
+    ```groovy
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    runtimeOnly 'com.h2database:h2'
+    ```
+2. `Account`Entity를 만든다.
+    유저 정보와 Id, Password, username, role 등을 포함한다. 
+
+3. Spring Security가 User 정보를 읽는 방법을 설정
+   ```java
+   @Service
+   public class AccountService implements UserDetailsService {
+   
+       @Autowired AccountRepository accountRepository;
+   
+       @Override
+       public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+           Account account = accountRepository.findByUsername(username);
+           if (account == null) {
+               throw new UsernameNotFoundException(username);
+           }
+           return User.builder()
+                   .username(account.getUsername())
+                   .password(account.getPassword())
+                   .roles(account.getRole())
+                   .build();
+       }
+   
+       public Account createNew(Account account) {
+           return accountRepository.save(account);
+       }
+   }
+   ```    
+    
+    `SecurityConfig`에 다음과 같이 명시적으로 설정해도 되지만 Bean으로 등록하는 것 만으로도 자동으로 읽어간다. 
+    ```java
+    @Override
+        protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+            auth.userDetailsService(accountService);
+        }
+    ```
+
+3. 회원가입하는 URL 혹은 페이지를 만들어서 Account를 등록하면 로그인 할 수 있다.
+    
